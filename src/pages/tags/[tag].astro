@@ -1,0 +1,403 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+
+export async function getStaticPaths() {
+  const allProjects = await getCollection("projects");
+  const allTags = Array.from(new Set(allProjects.flatMap((p) => p.data.tags)));
+
+  return allTags.map((tag) => {
+    const filteredProjects = allProjects
+      .filter((project) => project.data.tags.includes(tag as string))
+      .sort(
+        (a: CollectionEntry<"projects">, b: CollectionEntry<"projects">) =>
+          b.data.date.valueOf() - a.data.date.valueOf()
+      );
+
+    return {
+      params: { tag },
+      props: { projects: filteredProjects },
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { projects } = Astro.props;
+---
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Projects tagged with "{tag}</title>
+  </head>" — Yuta Komori
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <body>
+    <header class="header">
+      <div class="container container--wide flex-header">
+        <a href="/#skills" class="back-link">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+          Back to Skills
+        </a>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="section" id="projects">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section__title fade-in">
+              Projects tagged with <span style="color:var(--primary);"
+                >"{tag}"</span
+              >
+            </h2>
+          </div>
+          <div class="projects-grid">
+            {
+              projects.map((project: any, i: number) => (
+                <a
+                  href={`/projects/${project.slug}`}
+                  class="project-card-link"
+                  style={{
+                    display: "block",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <article
+                    class="project-card fade-in"
+                    style={`--delay: ${0.06 * (i + 1)}s`}
+                  >
+                    <div class="project-card__image">
+                      <Image
+                        src={project.data.thumbnail}
+                        alt={project.data.title}
+                      />
+                    </div>
+                    <div class="project-card__body">
+                      <div class="project-card__meta">
+                        <span class="project-card__year">
+                          {project.data.period}
+                        </span>
+                        {project.data.award && (
+                          <span class="project-card__award">
+                            🏆 {project.data.award}
+                          </span>
+                        )}
+                      </div>
+                      <h3 class="project-card__title">
+                        {project.data.title}
+                        <span class="project-card__title-en">
+                          {project.data.titleEn}
+                        </span>
+                      </h3>
+                      <p class="project-card__desc">
+                        {project.data.description}
+                      </p>
+                      {project.data.result && (
+                        <p class="project-card__result">
+                          {project.data.result}
+                        </p>
+                      )}
+                      <div class="project-card__footer">
+                        <div class="project-card__tags">
+                          {project.data.tags.map((t: string) => (
+                            <object>
+                              <span
+                                class={`tag tag--sm ${
+                                  t === tag ? "tag--primary" : ""
+                                }`}
+                              >
+                                {t}
+                              </span>
+                            </object>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <p class="footer__copy">© 2025 Yuta Komori</p>
+      </div>
+    </footer>
+
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -30px 0px" }
+      );
+      document
+        .querySelectorAll(".fade-in")
+        .forEach((el) => observer.observe(el));
+    </script>
+
+    <style>
+      /* ─── Tokens ─── */
+      :root {
+        --bg: #ffffff;
+        --bg-alt: #f7f7f5;
+        --text: #222;
+        --text-sub: #555;
+        --muted: #999;
+        --primary: #3d6b5e;
+        --primary-light: #eef4f1;
+        --border: #e8e8e5;
+        --radius: 10px;
+        --font-serif: "Source Serif 4", "Noto Sans JP", serif;
+        --font-sans: "Noto Sans JP", sans-serif;
+        --max-w: 880px;
+      }
+
+      /* ─── Reset ─── */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        font-family: var(--font-sans);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        line-height: 1.8;
+        font-weight: 400;
+      }
+      .container {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      .container--wide {
+        max-width: 1200px;
+      }
+
+      /* Header */
+      .header {
+        padding: 24px 0;
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        border-bottom: 1px solid var(--border);
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-sub);
+        transition: color 0.2s;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        color: var(--primary);
+      }
+
+      /* ─── Animation ─── */
+      .fade-in {
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity 0.55s ease, transform 0.55s ease;
+        transition-delay: var(--delay, 0s);
+      }
+      .fade-in.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Projects */
+      .section {
+        padding: 80px 0;
+      }
+      .section__title {
+        font-family: var(--font-serif);
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 48px;
+      }
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 32px;
+      }
+
+      .project-card-link {
+        transition: transform 0.3s ease;
+      }
+      .project-card-link:hover {
+        transform: translateY(-4px);
+      }
+      .project-card-link:hover .project-card__image img {
+        transform: scale(1.02);
+      }
+
+      .project-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .project-card__image {
+        width: 100%;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        background: var(--bg-alt);
+        border-bottom: 1px solid var(--border);
+      }
+      .project-card__image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+      }
+      .project-card__body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      .project-card__meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .project-card__year {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .project-card__award {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--primary);
+        background: var(--primary-light);
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .project-card__title {
+        font-family: var(--font-serif);
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+      .project-card__title-en {
+        display: block;
+        font-family: var(--font-sans);
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--text-sub);
+        margin-top: 2px;
+      }
+      .project-card__desc {
+        font-size: 14px;
+        color: var(--text-sub);
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .project-card__result {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--primary);
+        margin-bottom: 16px;
+        background: var(--primary-light);
+        padding: 8px 12px;
+        border-radius: 6px;
+      }
+      .project-card__footer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .project-card__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tag {
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 4px;
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        color: var(--text-sub);
+      }
+      .tag--primary {
+        background: var(--primary-light);
+        border-color: transparent;
+        color: var(--primary);
+      }
+
+      .footer {
+        padding: 32px 0;
+        border-top: 1px solid var(--border);
+      }
+      .footer__inner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .footer__copy {
+        font-size: 13px;
+        color: var(--muted);
+      }
+    </style>
+  </body>
+</html>
