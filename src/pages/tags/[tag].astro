@@ -40,6 +40,22 @@ const { projects } = Astro.props;
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"
     rel="stylesheet"
   />
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme");
+        }
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          return "dark";
+        }
+        return "light";
+      })();
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+      window.localStorage.setItem("theme", theme);
+    </script>
+  </head>
 
   <body>
     <header class="header">
@@ -76,7 +92,7 @@ const { projects } = Astro.props;
             {
               projects.map((project: any, i: number) => (
                 <a
-                  href={`/projects/${project.slug}`}
+                  href={`/projects/${project.id}`}
                   class="project-card-link"
                   style={{
                     display: "block",
@@ -182,6 +198,16 @@ const { projects } = Astro.props;
         --font-serif: "Source Serif 4", "Noto Sans JP", serif;
         --font-sans: "Noto Sans JP", sans-serif;
         --max-w: 880px;
+      }
+      :root.dark {
+        --bg: #111111;
+        --bg-alt: #1a1a1a;
+        --text: #eeeeee;
+        --text-sub: #aaaaaa;
+        --muted: #666666;
+        --primary: #529180;
+        --primary-light: #20352e;
+        --border: #333333;
       }
 
       /* ─── Reset ─── */
@@ -296,6 +322,9 @@ const { projects } = Astro.props;
         height: 100%;
         object-fit: cover;
         transition: transform 0.6s ease;
+      }
+      :root.dark .project-card__image img {
+        opacity: 0.85;
       }
       .project-card__body {
         padding: 24px;

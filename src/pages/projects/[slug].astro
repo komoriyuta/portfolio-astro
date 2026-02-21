@@ -1,17 +1,17 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
   return projects.map((project) => ({
-    params: { slug: project.slug },
+    params: { slug: project.id },
     props: { project },
   }));
 }
 
 const { project } = Astro.props;
-const { Content } = await project.render();
+const { Content } = await render(project);
 ---
 
 <html lang="ja">
@@ -27,6 +27,21 @@ const { Content } = await project.render();
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"
       rel="stylesheet"
     />
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme");
+        }
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          return "dark";
+        }
+        return "light";
+      })();
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+      window.localStorage.setItem("theme", theme);
+    </script>
   </head>
   <body>
     <header class="header">
@@ -202,6 +217,16 @@ const { Content } = await project.render();
         --font-sans: "Noto Sans JP", sans-serif;
         --max-w: 880px;
       }
+      :root.dark {
+        --bg: #111111;
+        --bg-alt: #1a1a1a;
+        --text: #eeeeee;
+        --text-sub: #aaaaaa;
+        --muted: #666666;
+        --primary: #529180;
+        --primary-light: #20352e;
+        --border: #333333;
+      }
 
       /* ─── Reset ─── */
       *,
@@ -357,6 +382,9 @@ const { Content } = await project.render();
         width: 100%;
         height: auto;
       }
+      :root.dark .project-content__image img {
+        opacity: 0.85;
+      }
 
       .project-content__text {
         max-width: 720px;
@@ -461,6 +489,9 @@ const { Content } = await project.render();
         height: 100%;
         object-fit: contain;
         display: block;
+      }
+      :root.dark .project-gallery__item img {
+        opacity: 0.85;
       }
 
       @media (max-width: 680px) {
