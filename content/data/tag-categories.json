@@ -1,0 +1,31 @@
+{
+    "Languages": [
+        "C / C++",
+        "Python",
+        "Dart",
+        "Rust"
+    ],
+    "ML / AI": [
+        "PyTorch",
+        "TensorFlow",
+        "TF Lite Micro",
+        "Transformer"
+    ],
+    "Frameworks & Tools": [
+        "Flutter",
+        "Unity",
+        "Next.js",
+        "Docker",
+        "nginx",
+        "3D Gaussian Splatting"
+    ],
+    "Hardware": [
+        "Arduino",
+        "ESP32",
+        "Raspberry Pi",
+        "3Dプリンタ",
+        "レーザー加工機",
+        "Fusion 360",
+        "加速度センサー"
+    ]
+}
