@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="#111827"/>
+  <text x="70" y="100" fill="#f9fafb" font-family="sans-serif" font-size="54" font-weight="700">Multi-agent Ito</text>
+  <text x="73" y="145" fill="#94a3b8" font-family="sans-serif" font-size="22">LangGraph game flow + phase-weighted reinforcement learning</text>
+  <g font-family="sans-serif" text-anchor="middle">
+    <g fill="#1e293b" stroke="#60a5fa" stroke-width="4">
+      <rect x="95" y="255" width="250" height="150" rx="24"/><rect x="475" y="255" width="250" height="150" rx="24"/><rect x="855" y="255" width="250" height="150" rx="24"/>
+    </g>
+    <g fill="#f8fafc" font-size="30" font-weight="700">
+      <text x="220" y="315">player_0</text><text x="600" y="315">player_1</text><text x="980" y="315">player_2</text>
+    </g>
+    <g fill="#94a3b8" font-size="21">
+      <text x="220" y="360">speaking / voting</text><text x="600" y="360">speaking / voting</text><text x="980" y="360">speaking / voting</text>
+    </g>
+    <path d="M345 330H475M725 330H855" stroke="#a78bfa" stroke-width="6" marker-end="url(#a)"/>
+    <rect x="330" y="500" width="540" height="95" rx="22" fill="#312e81" stroke="#a78bfa" stroke-width="4"/>
+    <text x="600" y="558" fill="#f8fafc" font-size="29" font-weight="700">reward by player × phase × hop</text>
+  </g>
+  <defs><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a78bfa"/></marker></defs>
+</svg>

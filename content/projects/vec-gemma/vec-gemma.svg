@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="#faf7f2"/>
+  <text x="70" y="105" fill="#292524" font-family="sans-serif" font-size="64" font-weight="700">vec_gemma</text>
+  <text x="74" y="155" fill="#78716c" font-family="sans-serif" font-size="24">Connecting semantic embeddings to a language model</text>
+  <g font-family="sans-serif" text-anchor="middle">
+    <rect x="70" y="260" width="280" height="160" rx="28" fill="#dbeafe" stroke="#2563eb" stroke-width="4"/>
+    <rect x="460" y="260" width="280" height="160" rx="80" fill="#ede9fe" stroke="#7c3aed" stroke-width="4"/>
+    <rect x="850" y="260" width="280" height="160" rx="28" fill="#dcfce7" stroke="#16a34a" stroke-width="4"/>
+    <text x="210" y="325" fill="#1e3a8a" font-size="32" font-weight="700">Sentence</text><text x="210" y="365" fill="#1e3a8a" font-size="32" font-weight="700">Embedding</text>
+    <text x="600" y="350" fill="#4c1d95" font-size="44" font-weight="700">VAE</text>
+    <text x="990" y="350" fill="#14532d" font-size="44" font-weight="700">Gemma</text>
+    <path d="M350 340H455M740 340H845" stroke="#57534e" stroke-width="7" marker-end="url(#a)"/>
+    <text x="600" y="535" fill="#57534e" font-size="27">semantic vector → initial embedding → generated text</text>
+  </g>
+  <defs><marker id="a" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#57534e"/></marker></defs>
+</svg>

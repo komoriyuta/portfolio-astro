@@ -12,6 +12,22 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { Content } = await render(project);
+const videoAssets = import.meta.glob(
+  "../../../content/projects/**/*.{mp4,webm}",
+  { query: "?url", import: "default", eager: true },
+) as Record<string, string>;
+const projectVideoSrc = project.data.video
+  ? videoAssets[
+      `../../../content/projects/${project.id}/${project.data.video.src.replace(
+        "./",
+        "",
+      )}`
+    ]
+  : undefined;
+const resolveProjectVideo = (src: string) =>
+  videoAssets[
+    `../../../content/projects/${project.id}/${src.replace("./", "")}`
+  ];
 ---
 
 <html lang="ja">
@@ -27,6 +43,23 @@ const { Content } = await render(project);
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"
       rel="stylesheet"
     />
+    {
+      project.data.model && (
+        <script
+          type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.0/model-viewer.min.js"
+        />
+      )
+    }
+    {
+      project.data.splat && (
+        <script
+          type="importmap"
+          is:inline
+          set:html={`{"imports":{"three":"/vendor/three/three.module.js"}}`}
+        />
+      )
+    }
     <script is:inline>
       const theme = (() => {
         if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
@@ -117,6 +150,23 @@ const { Content } = await render(project);
             <Content />
 
             {
+              project.data.video && projectVideoSrc && (
+                <figure class="project-video media-wide">
+                  <video
+                    src={projectVideoSrc}
+                    controls
+                    muted
+                    playsinline
+                    preload="metadata"
+                  />
+                  <figcaption>
+                    {project.data.video.caption ?? project.data.video.title}
+                  </figcaption>
+                </figure>
+              )
+            }
+
+            {
               project.data.images && project.data.images.length > 0 && (
                 <div class="project-gallery">
                   <h3>Gallery</h3>
@@ -130,6 +180,98 @@ const { Content } = await render(project);
                       </div>
                     ))}
                   </div>
+                </div>
+              )
+            }
+
+            {
+              project.data.videos && project.data.videos.length > 0 && (
+                <div class="project-gallery">
+                  <h3>Videos</h3>
+                  <div class="project-gallery__grid">
+                    {project.data.videos.map((video) => {
+                      const src = resolveProjectVideo(video.src);
+                      return (
+                        src && (
+                          <figure class="project-gallery__item project-gallery__video">
+                            <video
+                              src={src}
+                              controls
+                              muted
+                              playsinline
+                              preload="metadata"
+                            />
+                            <figcaption>
+                              {video.caption ?? video.title}
+                            </figcaption>
+                          </figure>
+                        )
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            }
+
+            {
+              project.data.splat && (
+                <div class="project-splat">
+                  <h3>{project.data.splat.title}</h3>
+                  <div
+                    class="project-splat__viewer"
+                    role="img"
+                    aria-label={project.data.splat.alt}
+                    data-splat-viewer
+                    data-src={project.data.splat.src}
+                    data-camera-up={JSON.stringify(
+                      project.data.splat.cameraUp ?? [0, -1, -0.6],
+                    )}
+                    data-camera-position={JSON.stringify(
+                      project.data.splat.initialCameraPosition ?? [0, -3, 2],
+                    )}
+                    data-camera-look-at={JSON.stringify(
+                      project.data.splat.initialCameraLookAt ?? [0, 0, 0],
+                    )}
+                    data-scale={JSON.stringify(
+                      project.data.splat.scale ?? [1, 1, 1],
+                    )}
+                    data-position={JSON.stringify(
+                      project.data.splat.position ?? [0, 0, 0],
+                    )}
+                    data-rotation={JSON.stringify(
+                      project.data.splat.rotation ?? [0, 0, 0, 1],
+                    )}
+                    data-alpha-threshold={project.data.splat.alphaThreshold ?? 5}
+                  >
+                    <p class="project-splat__fallback">
+                      展示記録を読み込んでいます。
+                    </p>
+                  </div>
+                  <p class="project-splat__note">
+                    ドラッグで回転、スクロールでズームできます。読み込みに少し時間がかかる場合があります。
+                  </p>
+                </div>
+              )
+            }
+
+            {
+              project.data.model && (
+                <div class="project-model">
+                  <h3>{project.data.model.title}</h3>
+                  <model-viewer
+                    src={project.data.model.src}
+                    poster={project.data.model.poster}
+                    alt={project.data.model.alt}
+                    camera-controls
+                    auto-rotate
+                    shadow-intensity="0.7"
+                    exposure="0.9"
+                    ar
+                  >
+                    <a class="project-model__download" href={project.data.model.src}>
+                      3Dモデルを開く
+                    </a>
+                  </model-viewer>
                 </div>
               )
             }
@@ -184,6 +326,14 @@ const { Content } = await render(project);
       </div>
     </footer>
 
+    <dialog class="image-lightbox" aria-label="画像を拡大表示">
+      <button class="image-lightbox__close" type="button" aria-label="閉じる">
+        ×
+      </button>
+      <img class="image-lightbox__image" alt="" />
+      <p class="image-lightbox__caption"></p>
+    </dialog>
+
     <script>
       const observer = new IntersectionObserver(
         (entries) => {
@@ -199,8 +349,92 @@ const { Content } = await render(project);
       document
         .querySelectorAll(".fade-in")
         .forEach((el) => observer.observe(el));
-    </script>
 
+      const lightbox = document.querySelector(".image-lightbox");
+      const lightboxImage = lightbox?.querySelector(".image-lightbox__image");
+      const lightboxCaption = lightbox?.querySelector(
+        ".image-lightbox__caption",
+      );
+      const lightboxClose = lightbox?.querySelector(".image-lightbox__close");
+
+      document.querySelectorAll(".project-detail img").forEach((image) => {
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", "画像を拡大表示");
+
+        const openImage = () => {
+          if (!lightbox || !lightboxImage || !lightboxCaption) return;
+          lightboxImage.src = image.currentSrc || image.src;
+          lightboxImage.alt = image.alt || "";
+          lightboxCaption.textContent = image.alt || "";
+          lightboxCaption.hidden = !image.alt;
+          lightbox.showModal();
+        };
+
+        image.addEventListener("click", openImage);
+        image.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openImage();
+          }
+        });
+      });
+
+      lightboxClose?.addEventListener("click", () => lightbox?.close());
+      lightbox?.addEventListener("click", (event) => {
+        if (event.target === lightbox) {
+          lightbox.close();
+        }
+      });
+    </script>
+    {
+      project.data.splat && (
+        <script type="module" is:inline>
+          const readArray = (element, name) => JSON.parse(element.dataset[name]);
+          const { Viewer, SceneFormat, LogLevel } = await import(
+            "/vendor/gaussian-splats-3d/gaussian-splats-3d.module.js"
+          );
+
+          document.querySelectorAll("[data-splat-viewer]").forEach((element) => {
+            const viewer = new Viewer({
+              rootElement: element,
+              cameraUp: readArray(element, "cameraUp"),
+              initialCameraPosition: readArray(element, "cameraPosition"),
+              initialCameraLookAt: readArray(element, "cameraLookAt"),
+              sharedMemoryForWorkers: false,
+              gpuAcceleratedSort: false,
+              sphericalHarmonicsDegree: 0,
+              logLevel: LogLevel.None,
+            });
+
+            viewer
+              .addSplatScene(element.dataset.src, {
+                format: SceneFormat.KSplat,
+                showLoadingUI: true,
+                splatAlphaRemovalThreshold: Number(
+                  element.dataset.alphaThreshold ?? 5,
+                ),
+                scale: readArray(element, "scale"),
+                position: readArray(element, "position"),
+                rotation: readArray(element, "rotation"),
+              })
+              .then(() => {
+                element.querySelector(".project-splat__fallback")?.remove();
+                viewer.start();
+              })
+              .catch((error) => {
+                console.error(error);
+                const fallback = element.querySelector(
+                  ".project-splat__fallback",
+                );
+                if (fallback) {
+                  fallback.textContent = "展示記録の読み込みに失敗しました。";
+                }
+              });
+          });
+        </script>
+      )
+    }
     <style>
       /* ─── Tokens ─── */
       :root {
@@ -385,6 +619,7 @@ const { Content } = await render(project);
       .project-content__image img {
         width: 100%;
         height: auto;
+        cursor: zoom-in;
       }
       :root.dark .project-content__image img {
         opacity: 0.85;
@@ -403,6 +638,70 @@ const { Content } = await render(project);
       .project-content__text :global(p) {
         margin-bottom: 24px;
         color: var(--text-sub);
+      }
+      .project-content__text :global(picture),
+      .project-content__text :global(img),
+      .project-content__text :global(video) {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 32px auto;
+      }
+      .project-content__text :global(img),
+      .project-content__text :global(video) {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-alt);
+      }
+      .project-content__text :global(img) {
+        cursor: zoom-in;
+      }
+      .project-content__text :global(video) {
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+      }
+      .project-content__text :global(p:has(> picture:only-child)),
+      .project-content__text :global(p:has(> img:only-child)),
+      .project-content__text :global(p:has(> video:only-child)) {
+        margin: 40px 0;
+      }
+      .project-content__text :global(p:has(> picture:only-child) picture),
+      .project-content__text :global(p:has(> img:only-child) img),
+      .project-content__text :global(p:has(> video:only-child) video),
+      .project-content__text :global(figure) {
+        width: min(960px, calc(100vw - 48px));
+        max-width: none;
+        margin-left: 50%;
+        transform: translateX(-50%);
+      }
+      .project-content__text :global(figure) {
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+      .project-content__text :global(figure img),
+      .project-content__text :global(figure picture),
+      .project-content__text :global(figure video) {
+        margin: 0 auto;
+      }
+      .project-content__text :global(figcaption) {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+        text-align: center;
+      }
+      .project-video video {
+        max-height: 72vh;
+      }
+      .project-content__text :global(.media-narrow) {
+        width: min(520px, 100%);
+      }
+      .project-content__text :global(.media-wide) {
+        width: min(1120px, calc(100vw - 48px));
+      }
+      :root.dark .project-content__text :global(img),
+      :root.dark .project-content__text :global(video) {
+        opacity: 0.88;
       }
 
       /* Result */
@@ -488,14 +787,163 @@ const { Content } = await render(project);
         border: 1px solid var(--border);
         background: var(--bg-alt);
       }
+      .project-content__text :global(.project-gallery__item) {
+        width: auto;
+        max-width: 100%;
+        margin: 0;
+        transform: none;
+      }
       .project-gallery__item img {
         width: 100%;
         height: 100%;
         object-fit: contain;
         display: block;
+        cursor: zoom-in;
+      }
+      .project-gallery__video {
+        display: block;
+      }
+      .project-gallery__video video {
+        width: 100%;
+        height: auto;
+        max-height: 520px;
+        aspect-ratio: auto;
+        object-fit: contain;
+        display: block;
+        border: 0;
+        border-radius: 0;
+        background: #0b0b0b;
+      }
+      .project-gallery__video figcaption {
+        padding: 10px 12px 12px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
       }
       :root.dark .project-gallery__item img {
         opacity: 0.85;
+      }
+
+      /* Image Lightbox */
+      .image-lightbox {
+        width: min(96vw, 1280px);
+        max-height: 92vh;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: white;
+      }
+      .image-lightbox::backdrop {
+        background: rgba(0, 0, 0, 0.82);
+      }
+      .image-lightbox__image {
+        display: block;
+        max-width: 100%;
+        max-height: 84vh;
+        margin: 0 auto;
+        border-radius: var(--radius);
+        background: #111;
+        object-fit: contain;
+      }
+      .image-lightbox__caption {
+        margin: 12px 48px 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 13px;
+        line-height: 1.7;
+        text-align: center;
+      }
+      .image-lightbox__close {
+        position: fixed;
+        top: 18px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        color: white;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .image-lightbox__close:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      /* Gaussian Splat */
+      .project-splat {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px dashed var(--border);
+      }
+      .project-splat h3 {
+        font-family: var(--font-serif);
+        font-size: 20px;
+        margin-bottom: 24px;
+        color: var(--text);
+      }
+      .project-splat__viewer {
+        position: relative;
+        width: 100%;
+        height: min(72vh, 560px);
+        min-height: 360px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #0b0b0b;
+      }
+      .project-splat__viewer canvas {
+        display: block;
+      }
+      .project-splat__fallback {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        margin: 0;
+        padding: 24px;
+        color: #ddd;
+        text-align: center;
+      }
+      .project-splat__note {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      /* 3D Model */
+      .project-model {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px dashed var(--border);
+      }
+      .project-model h3 {
+        font-family: var(--font-serif);
+        font-size: 20px;
+        margin-bottom: 24px;
+        color: var(--text);
+      }
+      .project-model model-viewer {
+        width: 100%;
+        height: min(70vh, 560px);
+        min-height: 360px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-alt);
+        overflow: hidden;
+      }
+      .project-model__download {
+        display: inline-flex;
+        margin: 16px;
+        padding: 10px 16px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 500;
       }
 
       @media (max-width: 680px) {

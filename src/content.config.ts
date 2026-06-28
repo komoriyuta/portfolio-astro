@@ -12,6 +12,44 @@ const projectsCollection = defineCollection({
             date: z.date(),
             thumbnail: image(),
             images: z.array(image()).optional(),
+            video: z
+                .object({
+                    title: z.string(),
+                    src: z.string(),
+                    caption: z.string().optional(),
+                })
+                .optional(),
+            videos: z
+                .array(
+                    z.object({
+                        title: z.string(),
+                        src: z.string(),
+                        caption: z.string().optional(),
+                    }),
+                )
+                .optional(),
+            model: z
+                .object({
+                    title: z.string(),
+                    src: z.string(),
+                    alt: z.string(),
+                    poster: z.string().optional(),
+                })
+                .optional(),
+            splat: z
+                .object({
+                    title: z.string(),
+                    src: z.string(),
+                    alt: z.string(),
+                    cameraUp: z.array(z.number()).length(3).optional(),
+                    initialCameraPosition: z.array(z.number()).length(3).optional(),
+                    initialCameraLookAt: z.array(z.number()).length(3).optional(),
+                    scale: z.array(z.number()).length(3).optional(),
+                    position: z.array(z.number()).length(3).optional(),
+                    rotation: z.array(z.number()).length(4).optional(),
+                    alphaThreshold: z.number().optional(),
+                })
+                .optional(),
             result: z.string().optional(),
             tags: z.array(z.string()),
             award: z.string().optional(),

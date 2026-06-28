@@ -1,31 +1,96 @@
 {
     "Languages": [
-        "C / C++",
+        "C++",
         "Python",
         "Dart",
-        "Rust"
+        "Rust",
+        "TypeScript"
     ],
     "ML / AI": [
         "PyTorch",
-        "TensorFlow",
-        "TF Lite Micro",
-        "Transformer"
+        "TensorFlow.js",
+        "TensorFlow Lite",
+        "Transformer",
+        "Sentence Transformers",
+        "Embedding",
+        "PCA",
+        "VAE",
+        "Gemma",
+        "LLM",
+        "Multi-Agent",
+        "LangGraph",
+        "LoRA",
+        "強化学習",
+        "機械学習",
+        "MLP",
+        "YOLO",
+        "ONNX"
     ],
-    "Frameworks & Tools": [
+    "Web / App / Graphics": [
+        "React",
         "Flutter",
         "Unity",
+        "Tauri",
+        "React Flow",
+        "Zustand",
+        "D3.js",
+        "boardgame.io",
         "Next.js",
-        "Docker",
-        "nginx",
-        "3D Gaussian Splatting"
+        "Supabase",
+        "Graph UI",
+        "GLSL",
+        "WebGL",
+        "p5.js",
+        "Three.js",
+        "ゲーム開発"
     ],
-    "Hardware": [
+    "Hardware / Embedded": [
         "Arduino",
         "ESP32",
-        "Raspberry Pi",
+        "Raspberry Pi Pico",
+        "PlatformIO",
+        "LED",
+        "NeoPixel",
+        "Bluetooth",
+        "HID",
+        "IMU",
+        "加速度センサー",
+        "PID制御",
+        "Wi-Fi",
+        "UDP",
+        "GPIO",
+        "PWM",
+        "I2C",
+        "サーボ",
+        "赤外線距離センサー",
+        "カラーセンサー",
+        "ステッピングモーター"
+    ],
+    "Methods / Domains": [
+        "OpenCV",
+        "ArUCo",
+        "DAG",
+        "分散学習",
+        "音声解析",
+        "FFT",
+        "BPM",
+        "3D Gaussian Splatting",
+        "カメラキャリブレーション",
+        "画像処理",
+        "ハフ変換",
+        "リアルタイム同期",
+        "Pydantic",
+        "PettingLLMs",
         "3Dプリンタ",
         "レーザー加工機",
-        "Fusion 360",
-        "加速度センサー"
+        "TSUBAME"
+    ],
+    "Project Context": [
+        "共同開発",
+        "学生プロジェクト",
+        "コミュニティ活動",
+        "教材制作",
+        "イベント運営",
+        "MkDocs"
     ]
 }
